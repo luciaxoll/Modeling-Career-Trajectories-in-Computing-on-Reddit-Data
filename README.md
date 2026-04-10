@@ -1,33 +1,190 @@
-# Modeling Career Trajectories in Computing (UofT EngSci Thesis)
+# Modeling Career Trajectories in Computing  
+### UofT Engineering Science Thesis
 
-This repository contains code and outputs for my undergraduate thesis on modeling longitudinal computing career trajectories from Reddit timelines using NLP, LLM-based event extraction, and association analyses (with planned causal extensions).
+This repository contains code, intermediate artifacts, and analysis outputs for my undergraduate thesis on modeling longitudinal computing career trajectories from Reddit using NLP, LLM-based event extraction, motivation classification, and survival analysis.
 
-Supervisor: Prof. Michael Guerzhoy (University of Toronto)
+**Supervisor:** Prof. Michael Guerzhoy (University of Toronto)
 
 ---
 
 ## Project Overview
 
-**Goal:** Construct user-level longitudinal timelines from Reddit and study how motivations and job-search behaviors are associated with downstream outcomes (e.g., receiving a job offer).
+The goal of this project is to construct user-level longitudinal career timelines from Reddit discussions and study whether self-expressed motivations for pursuing computing are associated with how long it takes users to reach an interview-like outcome.
 
-**Core pipeline:**
-1. Collect Reddit comments at scale (10 years).
-2. Build candidate sets for key events using keyword/regex filters.
-3. Label candidate comments using an LLM (few-shot + strict rubric + temporal constraints).
-4. Merge labeled events into per-user timelines, preserving non-event comments for context.
-5. Detect **users motivations** using regex + LLM labeling.
-6. Build **pre-anchor background features** using SentenceTransformer embeddings (then PCA).
-7. Run **adjusted logistic regression** for association analyses.
+The thesis focuses on large-scale, time-stamped Reddit narratives as a complementary data source to traditional surveys or interviews. Using LLM-based labeling pipelines, unstructured comments are converted into structured event and motivation signals, which are then integrated into per-user trajectories for downstream time-to-event analysis.
+
+### Research Question
+
+**How does a user’s self-expressed motivation for pursuing a computing career relate to how long it takes them to reach their first interview-like outcome?**
+
+---
+
+## Core Pipeline
+
+1. Collect historical Reddit comments at scale from career-related communities.
+2. Preprocess the data by removing empty comments, normalizing timestamps, and deduplicating records.
+3. Build candidate sets for career-related milestones using keyword and regex-based filtering.
+4. Label candidate comments for career events using an LLM with few-shot prompting and a strict annotation rubric.
+5. Label comments for self-expressed motivation using a separate LLM-based classification pipeline.
+6. Construct chronological user-level timelines that preserve both labeled events and broader comment context.
+7. Assign each user a **primary motivation** based on the most frequent non-`NONE` motivation label.
+8. Run Kaplan–Meier survival analysis to study time from first observed expression of primary motivation to first interview-like outcome.
 
 ---
 
 ## Data Sources
 
-### Reddit data (10 years)
-I downloaded historical Reddit data using the Arctic Shift Reddit Data Download Tool:
+### Reddit data
+
+Historical Reddit comments were collected using the Arctic Shift Reddit Data Download Tool:
+
 - https://arctic-shift.photon-reddit.com/download-tool
 
-The working dataset is scoped around career discussions (e.g., `r/cscareerquestions`) and includes:
-- author identifiers
+The working dataset is centered on career-related discussions, primarily from subreddits such as `r/cscareerquestions`, and includes:
+
+- anonymized author identifiers
 - timestamps (`created_utc`)
 - comment text (`body` / `text`)
+
+The dataset spans approximately 10 years of user activity and is used to build longitudinal user histories.
+
+---
+
+## Event Labeling
+
+The event-labeling pipeline identifies career-related milestones from unstructured Reddit comments.
+
+### Event labels
+
+- `GRADUATION`
+- `INTERVIEW`
+- `GOT_AN_OFFER`
+- `NONE`
+
+### Event-labeling approach
+
+- Use rule-based candidate filtering to identify comments likely to mention career milestones.
+- Apply LLM-based classification to the candidate set using few-shot prompting.
+- Use a strict rubric requiring that:
+  - the event refers to the **author** of the comment
+  - the event is temporally grounded near the comment date
+  - ambiguous, hypothetical, second-hand, or vague comments are labeled `NONE`
+
+This stage extracts discrete, time-stamped events that can be placed into user trajectories.
+
+---
+
+## Motivation Labeling
+
+A separate LLM-based pipeline is used to identify the author’s self-expressed motivation for pursuing a computing career or educational pathway.
+
+### Motivation labels
+
+- `MONEY`
+- `INTEREST`
+- `CAREER_SWITCH`
+- `STABILITY`
+- `PRESTIGE`
+- `NONE`
+
+### Motivation definitions
+
+- `MONEY`: financial goals, salary, compensation, or financial security
+- `INTEREST`: intrinsic enjoyment of programming, computers, or technology
+- `CAREER_SWITCH`: transition into computing from another field
+- `STABILITY`: desire for job security or long-term career prospects
+- `PRESTIGE`: status, brand-name companies, or social prestige
+- `NONE`: no clear personal motivation expressed
+
+After comment-level classification, each user is assigned a **primary motivation** based on their most frequent non-`NONE` label.
+
+---
+
+## User-Level Timeline Construction
+
+For each user with labeled career events, all available historical comments are ordered chronologically to build a longitudinal timeline.
+
+Each user trajectory may contain:
+
+- labeled career events
+- motivation-labeled comments
+- non-event comments preserved as narrative context
+
+This allows the project to model career development as an ordered sequence rather than a single static outcome.
+
+---
+
+## Analysis Design
+
+The main analysis uses **survival analysis** to compare time-to-event patterns across motivation groups.
+
+### Start time
+
+- first observed expression of the user’s **primary motivation**
+
+### Event of interest
+
+- first **interview-like outcome**
+- operationalized as the first occurrence of:
+  - `INTERVIEW`, or
+  - `GOT_AN_OFFER`
+
+### Method
+
+- Kaplan–Meier survival curves
+- global log-rank test
+
+### Observation window
+
+- 1460 days
+
+This framework captures not only whether users appear to reach an interview-like milestone, but also how quickly they do so.
+
+---
+
+## Main Thesis Finding
+
+Across the 1460-day observation window, survival distributions differed significantly across motivation groups.
+
+Among the larger groups, users in the `INTEREST` category generally reached interview-like outcomes earlier than users in the `MONEY` and `CAREER_SWITCH` categories. The smaller `STABILITY` and `PRESTIGE` groups showed the highest eventual cumulative proportions reaching an interview-like event, though those estimates should be interpreted more cautiously due to smaller sample sizes.
+
+These findings suggest that self-expressed motivation is associated with differences in job-search progression in computing pathways.
+
+---
+
+## Ethical Notes
+
+This project uses publicly available Reddit data, but treats it with care consistent with prior work on ethical Reddit research.
+
+- user identifiers are anonymized
+- analyses are conducted at the aggregate level
+- the focus is on statistical patterns rather than individual case studies
+- direct quotation of user content should be avoided where possible
+
+---
+
+## Repository Scope
+
+This repository includes code and outputs for:
+
+- Reddit preprocessing
+- candidate filtering
+- LLM-based event labeling
+- LLM-based motivation labeling
+- user-level timeline construction
+- survival analysis and visualization
+
+Some earlier experimental directions may still appear in the codebase, but the final thesis centers on the event/motivation timeline pipeline and survival-based analysis described above.
+
+---
+
+## Future Directions
+
+Possible extensions include:
+
+- modeling motivation as dynamic rather than fixed at the user level
+- incorporating richer background features from prior text
+- testing robustness under alternative start-time or event definitions
+- exploring stronger adjustment or causal inference frameworks in future work
+
+---
