@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import json, argparse, os, re, sys, datetime
+from pathlib import Path
+
 import pandas as pd
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # ---------- EDUCATION ----------
 START_PROG_RE = re.compile(
@@ -42,7 +46,11 @@ def stream_jsonl(path):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="r_cscareerquestions_posts.jsonl (NOT the .crswap)")
-    ap.add_argument("--out", default="output/candidates_v2.csv")
+    ap.add_argument(
+        "--out",
+        default=str(_REPO_ROOT / "output" / "candidates_v2.csv"),
+        help="Output CSV path (default: <repo>/output/candidates_v2.csv).",
+    )
     ap.add_argument("--min_chars", type=int, default=15)
     args = ap.parse_args()
 

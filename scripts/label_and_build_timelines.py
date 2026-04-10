@@ -11,18 +11,22 @@ import random
 import time
 import re
 import hashlib
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 import pandas as pd
 from openai import OpenAI
 
 # --------------------------------------------------
-# CONFIG
+# CONFIG (paths relative to repository root by default)
 # --------------------------------------------------
-INPUT_PATH   = "output/candidates_v2.csv"    # ~200k rows
-SEED_PATH    = "output/label_500.csv"        # has event_type + text/body
-ROW_OUTPUT   = "output/candidates_v2_labeled_llm_clean.csv"   # NEW clean merged file
-TL_OUTPUT    = "output/user_timelines.csv"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_OUTPUT = _REPO_ROOT / "output"
+
+INPUT_PATH   = _OUTPUT / "candidates_v2.csv"    # ~200k rows
+SEED_PATH    = _OUTPUT / "label_500.csv"        # has event_type + text/body
+ROW_OUTPUT   = _OUTPUT / "candidates_v2_labeled_llm_clean.csv"
+TL_OUTPUT    = _OUTPUT / "user_timelines.csv"
 
 MAX_ROWS             = 10000
 FEWSHOTS_PER_LABEL   = 4           # 3–6 good for cost
@@ -293,7 +297,7 @@ def main():
     # 0) Load/repair previously labeled store and collect seen keys
     prev_df: Optional[pd.DataFrame] = None
     seen_keys = set()
-    if os.path.exists(ROW_OUTPUT):
+    if ROW_OUTPUT.exists():
         try:
             prev_df = pd.read_csv(ROW_OUTPUT)
             prev_df = repair_and_dedup(prev_df)

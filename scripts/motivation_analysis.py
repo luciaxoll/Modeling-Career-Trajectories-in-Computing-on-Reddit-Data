@@ -1,14 +1,20 @@
 import json
+from pathlib import Path
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from lifelines import KaplanMeierFitter, CoxPHFitter
 from lifelines.statistics import multivariate_logrank_test, pairwise_logrank_test
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_OUT = _REPO_ROOT / "output"
+_MOT = _OUT / "motivation_outputs"
+
 # ---------------- Paths ----------------
-USER_ACTIVITY = "output/user_activity.json"
-COMMENT_MOT = "output/motivation_outputs/comment_motivations.jsonl"
-USER_MOT = "output/motivation_outputs/user_motivations.csv"
+USER_ACTIVITY = _OUT / "user_activity.json"
+COMMENT_MOT = _MOT / "comment_motivations.jsonl"
+USER_MOT = _MOT / "user_motivations.csv"
 
 # ---------------- Settings ----------------
 HORIZON_DAYS = 1460  

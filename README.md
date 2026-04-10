@@ -163,6 +163,38 @@ This project uses publicly available Reddit data, but treats it with care consis
 
 ---
 
+## Repository layout
+
+| Path | Purpose |
+|------|---------|
+| [`scripts/filter_candidates_posts.py`](scripts/filter_candidates_posts.py) | Regex-based candidate extraction from Reddit JSONL |
+| [`scripts/make_label_set.py`](scripts/make_label_set.py) | Stratified sample for manual / few-shot seed labels |
+| [`scripts/label_and_build_timelines.py`](scripts/label_and_build_timelines.py) | LLM event labeling and `user_timelines.csv` construction |
+| [`scripts/build_user_activity.py`](scripts/build_user_activity.py) | Merge labels into per-user `user_activity.json` |
+| [`scripts/user_motivation.py`](scripts/user_motivation.py) | LLM motivation classification over user comments |
+| [`scripts/motivation_analysis.py`](scripts/motivation_analysis.py) | Survival analysis (Kaplan–Meier, log-rank, Cox) |
+
+Intermediate files are written under `output/` (ignored in git). Clone the repo, create `output/`, and run scripts from the **repository root** so default paths resolve correctly.
+
+### Quick start (after installing dependencies)
+
+```bash
+python -m venv .venv
+# activate .venv, then:
+pip install -r requirements.txt
+export OPENAI_API_KEY=...   # Windows: set OPENAI_API_KEY=...
+
+python scripts/filter_candidates_posts.py --input /path/to/posts.jsonl
+python scripts/make_label_set.py --total 500
+# Manually fill event_type (etc.) in output/label_500.csv, then:
+python scripts/label_and_build_timelines.py
+python scripts/build_user_activity.py
+python scripts/user_motivation.py --input output/user_activity.json --outdir output/motivation_outputs
+python scripts/motivation_analysis.py
+```
+
+---
+
 ## Repository Scope
 
 This repository includes code and outputs for:

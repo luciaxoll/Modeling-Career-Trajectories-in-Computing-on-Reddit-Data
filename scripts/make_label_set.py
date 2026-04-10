@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-import pandas as pd, numpy as np, os, argparse
+import os
+import argparse
+from pathlib import Path
+
+import pandas as pd
+import numpy as np
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 EDU_COLS   = ["hit_StartProgram","hit_SwitchProgram","hit_Dropout","hit_Graduation"]
 INTV_COLS  = ["hit_PhoneScreen","hit_OA","hit_Onsite"]
@@ -37,8 +44,14 @@ def stratified_take(df, plan):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--candidates", default="output/candidates_v2.csv")
-    ap.add_argument("--out", default="output/label_500.csv")
+    ap.add_argument(
+        "--candidates",
+        default=str(_REPO_ROOT / "output" / "candidates_v2.csv"),
+    )
+    ap.add_argument(
+        "--out",
+        default=str(_REPO_ROOT / "output" / "label_500.csv"),
+    )
     ap.add_argument("--total", type=int, default=100)
     args = ap.parse_args()
 
