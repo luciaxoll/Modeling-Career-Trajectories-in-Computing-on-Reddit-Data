@@ -1,0 +1,19 @@
+.venv/
+NeurIPS-2024-end-to-end-causal-effect-estimation-from-unstructured-natural-language-data-Paper-Conference.pdf
+Thesis Proposal Lucia Sun.pdf
+r_cscareerquestions_posts.jsonl
+r_cscareerquestions_posts.jsonl.crswap
+output/
+csInitiationCode/
+Modeling-Career-Trajectories-in-Computing-and-Causal-Inference-on-Reddit-Data/
+Thesis Interim Report.pdf
+motivation_analysisOLD.py
+Final_Thesis.pdf
+ITiCSE_poster.pdf
+Figure_1.pdf
+PresentationThesis.pptx
+make_natural_samples.py
+prepare_natural_dataset.py
+__pycache__/
+*.py[cod]
+
